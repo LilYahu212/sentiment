@@ -1,0 +1,22 @@
+name: record-sentiment
+on:
+  schedule:
+    - cron: '7 * * * *'        # каждый час в :07 (UTC)
+  workflow_dispatch: {}        # ручной запуск кнопкой
+permissions:
+  contents: write
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python record.py
+      - run: |
+          git config user.name "sentiment-bot"
+          git config user.email "sentiment-bot@users.noreply.github.com"
+          git add data
+          git commit -m "sentiment $(date -u +'%Y-%m-%d %H:%M')" || echo "нет изменений"
+          git push
